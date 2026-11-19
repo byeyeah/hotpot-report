@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>火锅品牌营收数据分析报告</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    font-family: 'Segoe UI', 'Microsoft YaHei', Tahoma, Geneva, Verdana, sans-serif;
+    padding: 20px; margin: 0; color: #2c3e50;
+  }
+  .container { max-width: 1180px; margin: 0 auto; }
+  .header {
+    background: linear-gradient(90deg, #1e3c72, #2a5298);
+    color: white; padding: 28px 20px; border-radius: 10px;
+    margin-bottom: 22px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); text-align: center;
+  }
+  .header h1 { margin: 0 0 8px; font-size: 26px; }
+  .header p { margin: 0; opacity: .9; font-size: 14px; }
+  .notice {
+    background: #fff8e1; border-left: 5px solid #ff9800; border-radius: 8px;
+    padding: 14px 18px; margin-bottom: 24px; font-size: 14px; color: #6d4c00;
+    box-shadow: 0 2px 8px rgba(0,0,0,.06);
+  }
+  .notice b { color: #e65100; }
+  .card {
+    background: #fff; border-radius: 15px; box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+    margin-bottom: 28px; border: none; overflow: hidden;
+  }
+  .card-header {
+    background: linear-gradient(90deg, #4b6cb7, #182848); color: white;
+    font-weight: 600; padding: 15px 20px; font-size: 17px;
+  }
+  .card-body { padding: 20px; }
+  .table-container { overflow-x: auto; }
+  table { min-width: 100%; border-collapse: separate; border-spacing: 0; }
+  th {
+    background-color: #2c3e50; color: white; padding: 12px 14px;
+    text-align: center; border: 1px solid #e0e0e0; font-size: 14px;
+  }
+  td { padding: 11px 14px; text-align: center; border: 1px solid #e0e0e0; font-size: 14px; }
+  tr:nth-child(even) { background-color: #f8f9fa; }
+  tr:hover { background-color: #e9f7fe; transition: background-color .3s; }
+  .brand td:first-child { font-weight: 700; text-align: left; }
+  .negative { color: #e53935; font-weight: 600; }
+  .positive { color: #43a047; font-weight: 600; }
+  .flat { color: #757575; }
+  .highlight { background-color: #fff9c4 !important; font-weight: bold; }
+  .h1-badge {
+    display: inline-block; background: #ff6d00; color: #fff; font-size: 11px;
+    padding: 1px 7px; border-radius: 10px; margin-left: 6px; vertical-align: middle;
+  }
+  .bar-wrap { display: flex; align-items: center; gap: 8px; justify-content: flex-start; }
+  .bar-track { background: #eef1f6; border-radius: 4px; height: 16px; flex: 1; min-width: 90px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 4px; }
+  .bar-fill.y24 { background: linear-gradient(90deg, #4b6cb7, #4b6cb7cc); }
+  .bar-fill.y25 { background: linear-gradient(90deg, #00b09b, #96c93d); }
+  .bar-val { font-size: 12px; white-space: nowrap; min-width: 62px; text-align: right; }
+  .bar-cmp { text-align: left; min-width: 210px; }
+  .caption { font-size: 13px; color: #6c757d; margin: 0 0 12px; }
+  .swot { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .swot-box { border-radius: 12px; padding: 16px 18px; color: #fff; box-shadow: 0 3px 10px rgba(0,0,0,.12); }
+  .swot-box h4 { margin: 0 0 10px; font-size: 16px; display: flex; align-items: center; gap: 8px; }
+  .swot-box ul { margin: 0; padding-left: 18px; font-size: 13.5px; line-height: 1.75; }
+  .swot-box li { margin-bottom: 6px; }
+  .s { background: linear-gradient(135deg, #11998e, #38ef7d); }
+  .w { background: linear-gradient(135deg, #eb5757, #f2994a); }
+  .o { background: linear-gradient(135deg, #2193b0, #6dd5ed); }
+  .t { background: linear-gradient(135deg, #4b1248, #8e2de2); }
+  .conclusion {
+    background: #e8f5e9; border-left: 5px solid #43a047; border-radius: 8px;
+    padding: 14px 18px; font-size: 14px; line-height: 1.8; color: #1b5e20;
+  }
+  .footer { text-align: center; margin-top: 26px; color: #6c757d; font-size: 13px; line-height: 1.7; }
+  @media (max-width: 760px) { .swot { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <h1>火锅品牌营收数据分析报告</h1>
+    <p>数据来源：火锅数据.xlsx｜营收对比 · 成本结构 · SWOT 分析</p>
+  </div>
+
+  <div class="notice">
+    <b>⚠ 数据口径重要提示：</b>表中 <b>怂火锅</b>、<b>山的山外面</b> 的 2025 年数据为<b>上半年（H1）</b>口径，
+    2024 年为全年口径，两者期间长度不同，<b>同比增幅仅供参考，不可与全年数据直接等同比较</b>。
+    海底捞、凑凑 2025 年为全年数据。单品牌成本项上市公司未单独披露，成本结构采用母公司九毛九集团口径作旁证。
+  </div>
+
+  <!-- 模块一：营收对比 -->
+  <div class="card">
+    <div class="card-header">📊 一、营收对比（2024 vs 2025）</div>
+    <div class="card-body">
+      <p class="caption">进度条长度按各品牌自身两年中的较大值归一，用于同品牌跨年对比；不同品牌间绝对量级差异极大（海底捞 432 亿 vs 山的山外面 0.14 亿），请勿横向比较条长。</p>
+      <div class="table-container">
+        <table id="revTable">
+          <thead>
+            <tr>
+              <th style="text-align:left">品牌</th>
+              <th>归属集团</th>
+              <th>2024年营收</th>
+              <th class="bar-cmp">2024 对比</th>
+              <th>2025年营收</th>
+              <th class="bar-cmp">2025 对比</th>
+              <th>同比</th>
+              <th>口径说明</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="brand">
+              <td>海底捞</td><td>海底捞(06862.HK)</td>
+              <td>427.55亿元</td>
+              <td class="bar-cmp"><div class="bar-wrap"><div class="bar-track"><div class="bar-fill y24" style="width:98.9%"></div></div><span class="bar-val">427.55亿</span></div></td>
+              <td>432.25亿元</td>
+              <td class="bar-cmp"><div class="bar-wrap"><div class="bar-track"><div class="bar-fill y25" style="width:100%"></div></div><span class="bar-val">432.25亿</span></div></td>
+              <td class="positive">+1.1%</td><td>2025为全年</td>
+            </tr>
+            <tr class="brand">
+              <td>凑凑</td><td>呷哺呷哺(00520.HK)</td>
+              <td>19.48亿元</td>
+              <td class="bar-cmp"><div class="bar-wrap"><div class="bar-track"><div class="bar-fill y24" style="width:100%"></div></div><span class="bar-val">19.48亿</span></div></td>
+              <td>13.49亿元</td>
+              <td class="bar-cmp"><div class="bar-wrap"><div class="bar-track"><div class="bar-fill y25" style="width:69.3%"></div></div><span class="bar-val">13.49亿</span></div></td>
+              <td class="negative">-30.8%</td><td>2025为全年</td>
+            </tr>
+            <tr class="brand">
+              <td>怂火锅<span class="h1-badge">H1</span></td><td>九毛九(09922.HK)</td>
+              <td>8.95亿元</td>
+              <td class="bar-cmp"><div class="bar-wrap"><div class="bar-track"><div class="bar-fill y24" style="width:100%"></div></div><span class="bar-val">8.95亿</span></div></td>
+              <td>4.16亿元</td>
+              <td class="bar-cmp"><div class="bar-wrap"><div class="bar-track"><div class="bar-fill y25" style="width:46.5%"></div></div><span class="bar-val">4.16亿</span></div></td>
+              <td class="negative">-3.5%</td><td>2025仅为上半年</td>
+            </tr>
+            <tr class="brand">
+              <td>山的山外面<span class="h1-badge">H1</span></td><td>九毛九(09922.HK)</td>
+              <td>0.294亿元</td>
+              <td class="bar-cmp"><div class="bar-wrap"><div class="bar-track"><div class="bar-fill y24" style="width:52.5%"></div></div><span class="bar-val">0.294亿</span></div></td>
+              <td>0.14亿元</td>
+              <td class="bar-cmp"><div class="bar-wrap"><div class="bar-track"><div class="bar-fill y25" style="width:25%"></div></div><span class="bar-val">0.14亿</span></div></td>
+              <td class="positive">+24%</td><td>2024为全年、2025为上半年</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 盈利指标 -->
+  <div class="card">
+    <div class="card-header">💰 二、盈利与经营指标明细</div>
+    <div class="card-body">
+      <div class="table-container">
+        <table id="profitTable">
+          <thead>
+            <tr>
+              <th style="text-align:left">品牌/集团</th><th>指标</th><th>2024年</th><th>2025年</th><th>同比变化</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="brand"><td rowspan="4">海底捞（集团）</td><td>营业成本</td><td>162.11亿元</td><td>175.26亿元</td><td class="negative">+8.1%</td></tr>
+            <tr><td>毛利率</td><td>61.8%</td><td>59.45%</td><td class="negative">-2.35pct</td></tr>
+            <tr><td>净利率（归母）</td><td>11.0%</td><td>9.35%</td><td class="negative">-1.65pct</td></tr>
+            <tr><td>归母净利润</td><td>47.08亿元</td><td>40.50亿元</td><td class="negative">-13.98%</td></tr>
+
+            <tr class="brand"><td rowspan="4">凑凑（品牌）</td><td>餐厅层面经营利润</td><td class="negative">亏损约3.5亿</td><td class="negative">亏损2.00亿</td><td class="negative">亏损扩大10.5%</td></tr>
+            <tr><td>经营利润率</td><td class="negative">亏损</td><td class="negative">亏损</td><td class="negative">连续4年亏损</td></tr>
+            <tr><td>客单价</td><td>123.5元</td><td>148.8元</td><td class="positive">+20.49%</td></tr>
+            <tr><td>翻台率</td><td>1.6次/天</td><td>1.4次/天</td><td class="negative">-0.2次</td></tr>
+
+            <tr class="brand"><td rowspan="4">怂火锅（品牌）<span class="h1-badge">H1</span></td><td>经营利润</td><td class="flat">—</td><td>0.15亿元（H1）</td><td class="negative">-60%</td></tr>
+            <tr><td>餐厅层面经营利润率</td><td>8.6%</td><td>3.6%（H1）</td><td class="negative">-5.0pct</td></tr>
+            <tr><td>客单价</td><td>103元</td><td>99元（H1）</td><td class="negative">下降</td></tr>
+            <tr><td>翻座率</td><td>2.0次/天</td><td>1.7次/天（H1）</td><td class="negative">-0.3次</td></tr>
+
+            <tr class="brand"><td rowspan="3">山的山外面（品牌）<span class="h1-badge">H1</span></td><td>经营利润率</td><td class="flat">未单独披露</td><td class="flat">未单独披露</td><td class="flat">新品牌，规模尚小</td></tr>
+            <tr><td>翻座率</td><td>2.9次/天</td><td>2.5次/天（H1）</td><td class="negative">下降</td></tr>
+            <tr><td>客单价</td><td>87元</td><td class="flat">未披露</td><td class="flat">—</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 模块二：成本结构 -->
+  <div class="card">
+    <div class="card-header">🧾 三、成本结构（九毛九集团口径，怂火锅 / 山的山外面母公司）</div>
+    <div class="card-body">
+      <p class="caption">下表为占收入比。单品牌成本项未单独披露，故以母公司九毛九集团整体成本结构作旁证。</p>
+      <div class="table-container">
+        <table id="costTable">
+          <thead>
+            <tr><th style="text-align:left">成本项</th><th>2024年占收入比</th><th>同比变化</th><th>解读</th></tr>
+          </thead>
+          <tbody>
+            <tr class="brand"><td>原材料成本</td><td>35.6%</td><td class="positive">-0.2pct</td><td style="text-align:left">唯一下降项，供应链集采与标准化略有成效</td></tr>
+            <tr class="brand"><td>员工成本</td><td>28.8%</td><td class="negative">+3.0pct</td><td style="text-align:left">涨幅最大，人力刚性上升是利润主要挤压项</td></tr>
+            <tr class="brand"><td>使用权折旧及租金</td><td>11.7%</td><td class="negative">+1.3pct</td><td style="text-align:left">门店收缩但租金折旧难同步下降，经营杠杆承压</td></tr>
+            <tr class="brand highlight"><td>归母净利率</td><td>0.9%</td><td class="negative">-6.7pct</td><td style="text-align:left">成本三线夹击下净利几近归零，微利特征显著</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 模块三：SWOT -->
+  <div class="card">
+    <div class="card-header">🧭 四、SWOT 分析</div>
+    <div class="card-body">
+      <div class="swot">
+        <div class="swot-box s">
+          <h4>💪 Strengths 优势</h4>
+          <ul>
+            <li><b>海底捞规模碾压</b>：营收 432.25 亿元，是凑凑（13.49亿）的约 32 倍、怂火锅的百倍级，规模与品牌壁垒最高。</li>
+            <li><b>唯一正增长</b>：四品牌中仅海底捞 2025 年营收同比为正（+1.1%），抗周期能力最强。</li>
+            <li><b>盈利底盘厚</b>：海底捞毛利率 61.8%、净利率 11.0%，远高于九毛九集团归母净利率 0.9%，造血能力充足。</li>
+          </ul>
+        </div>
+        <div class="swot-box w">
+          <h4>⚠️ Weaknesses 劣势</h4>
+          <ul>
+            <li><b>凑凑深度亏损</b>：营收 -30.8% 跌幅最深，餐厅层面连续 4 年亏损，是集团主要失血点。</li>
+            <li><b>提价失客</b>：凑凑客单价 +20.49% 至 148.8 元，翻台率反降至 1.4 次/天，量价背离。</li>
+            <li><b>怂火锅量价齐跌</b>：经营利润率 8.6%→3.6%（H1）近乎腰斩，客单价、翻座率双降。</li>
+            <li><b>成本刚性上涨</b>：员工成本 +3.0pct、租金折旧 +1.3pct，挤压利润空间。</li>
+          </ul>
+        </div>
+        <div class="swot-box o">
+          <h4>🚀 Opportunities 机会</h4>
+          <ul>
+            <li><b>新品牌增量</b>：山的山外面营收同比 +24%（H1 口径），新品牌仍处培育爬坡期，有放量空间。</li>
+            <li><b>供应链降本</b>：原材料成本占比已 -0.2pct，集采与复合调味料标准化仍有优化余地。</li>
+            <li><b>海底捞盈利修复</b>：营收已回正，若成本端企稳，净利率有望从 9.35% 回升。</li>
+          </ul>
+        </div>
+        <div class="swot-box t">
+          <h4>🔥 Threats 威胁</h4>
+          <ul>
+            <li><b>增收不增利蔓延</b>：海底捞营收 +1.1% 但归母净利 -13.98%，行业整体陷"以价换量"。</li>
+            <li><b>成本三线夹击</b>：人力、租金、折旧同步上行，九毛九归母净利率仅剩 0.9%，安全垫极薄。</li>
+            <li><b>凑凑模型失效风险</b>：高端定位叠加客流流失，若持续亏损或拖累呷哺集团整体。</li>
+            <li><b>数据口径风险</b>：怂火锅、山的山外面仅上半年数据，全年走势待验证，判断需谨慎。</li>
+          </ul>
+        </div>
+      </div>
+      <div class="conclusion" style="margin-top:18px">
+        <b>核心结论：</b>火锅赛道呈明显分化——海底捞凭规模与品牌独享正增长，但同样"增收不增利"；
+        凑凑、怂火锅陷入"提价失客"或"降价失血"的两难；新品牌山的山外面尚在培育。
+        行业共同压力来自员工与租金成本的刚性上涨，降本增效与模型重构是下一阶段胜负手。
+        <b>注：怂火锅、山的山外面的 2025 年数据为上半年口径，全年表现待年报验证。</b>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>火锅品牌营收数据分析报告｜全部数据取自 火锅数据.xlsx，未作任何外部数据补充</p>
+    <p>怂火锅、山的山外面 2025 年数据为上半年（H1）口径，同比仅供参考 ｜ 单品牌成本项未披露，成本结构为九毛九集团口径</p>
+  </div>
+
+</div>
+</body>
+</html>
